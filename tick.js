@@ -360,7 +360,7 @@ $(function() {
         ohSnap("The square filled. Nuts!");
       } else {
         this.board[this.vars.swapFrom] = '';
-        this.board[this.vars.swapTo] = 'p';
+        this.board[this.vars.swapTo] = 'c';
       }
     },
     pick_jumpa: function(bid) {
