@@ -46,8 +46,10 @@ var TickFortress = Backbone.View.extend({
     bait: 'Place a medic kit',
     swapa: 'Pick a chief to shove',
     swapb: 'Pick the tile to shove him to',
+    autoswap: '*SHOVE*',
     jumpa: 'Pick your soldier to rocket-launch',
     jumpb: 'Pick where he lands',
+    autojump: '*KABOOM* Rocket jump!',
     autoswapteam: "You're a real Benedict Arnold. Traitors, traitors everywhere",
     autoturret: "Target acquired. BLAM BLAM BLAM BLAM. Target dead.",
     camp: 'Spawn camp a non-central location.',
@@ -326,12 +328,19 @@ var TickFortress = Backbone.View.extend({
     if (this.board[bid] != '') {
       ohSnap("You can't shove a Chief into someone else.", 'red');
     } else {
-      this.board[bid] = 'c';
-      this.board[this.vars.swapFrom] = '';
-      this.achieve("Shovetastic.");
-      this.$el.find('.blink').removeClass('blink');
+      this.vars.swapTo = bid;
+      this.achieve("GET OVER THERE!");
       this.renderBoard();
       this.moveComplete();
+    }
+  },
+  autoswap: function() {
+    this.$el.find('.blink').removeClass('blink');
+    if (this.board[this.vars.swapTo] != '') {
+      ohSnap("The square filled. Nuts!");
+    } else {
+      this.board[this.vars.swapFrom] = '';
+      this.board[this.vars.swapTo] = 'p';
     }
   },
   pick_jumpa: function(bid) {
@@ -347,12 +356,18 @@ var TickFortress = Backbone.View.extend({
     if (this.board[bid] != '') {
       ohSnap("You can only jump into an empty square.", 'red');
     } else {
-      this.board[bid] = 'p';
-      this.board[this.vars.jumpFrom] = '';
-      this.achieve("Shovetastic.");
-      this.$el.find('.blink').removeClass('blink');
-      this.renderBoard();
+      this.vars.jumpTo = bid;
+      this.achieve("ROOOOCKET JUUUMP.");
       this.moveComplete();
+    }
+  },
+  autojump: function() {
+    this.$el.find('.blink').removeClass('blink');
+    if (this.board[this.vars.jumpTo] != '') {
+      ohSnap("The square filled. Nuts!");
+    } else {
+      this.board[this.vars.jumpFrom] = '';
+      this.board[this.vars.jumpTo] = 'p';
     }
   },
   clearAutos: function() {
