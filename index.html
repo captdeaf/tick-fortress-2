@@ -5,10 +5,116 @@
 <head>
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
  <title>Tick Fortress 2</title>
+ <script type="text/javascript" src="zepto.min.js"></script>
+ <script type="text/javascript" src="underscore-min.js"></script>
+ <script type="text/javascript" src="backbone-min.js"></script>
+ <script type="text/javascript" src="ohsnap.js"></script>
+ <script type="text/javascript" src="tick.js"></script>
+ <script type="text/template" id="achievement">
+<div class="achievement">
+<b>Achievement Unlocked:</b> <%= achievement %>
+</div>
+ </script>
  <style type="text/css">
+  .alert {
+    padding: 15px;
+    border: 1px solid #eed3d7;
+    border-radius: 4px;
+  }
+  .alert-green {
+    background-color: green;
+  }
+  .classpicker {
+    cursor: pointer;
+    width: 200px;
+    margin-left: 0.5em;
+  }
+  .locked:before {
+    content: "*LOCKED*";
+    color: red;
+  }
+  .locked {
+    cursor: not-allowed;
+  }
+  .selected {
+    font-weight: bold;
+  }
+  .achievements:empty {
+    content: "No achievements unlocked. Darn!";
+    display: block;
+  }
+  td.main {
+    padding: 0.5em;
+  }
+  td.square {
+    padding: 0.5em;
+    margin: 0px;
+    border: 1px solid black;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+  }
  </style>
 </head>
 <body>
-
+  <h2>Welcome to Tick Fortress 2!</h2>
+  <br>
+  <br>
+  <!-- Yeah, I suck at HTML, so I'm using tables. So sue me =). -->
+  <table><tr>
+    <td class="main" valign="top">
+      <div id="charpicker">
+        <b>Pick a Class:</b>
+        <div class="classpicker selected unlocked" id="class-nobody" data-moves="p c" data-skill="This guy will never win.">Unclassed</div>
+        <div class="classpicker unlocked" id="class-soldier" data-moves="p c p c destroy p c c p c p c p c" data-skill="You can destroy any tile your third turn, but you're slow, so enemy then goes twice.">Soldier</div>
+        <div class="classpicker unlocked" id="class-scout" data-moves="p c p p c p c p c p" data-skill="The fast-moving scout can go twice their second play!">Scout</div>
+        <div class="classpicker locked" id="class-pyro">Pyro</div>
+        <div class="classpicker locked" id="class-demoman">Demoman</div>
+        <div class="classpicker locked" id="class-heavy">Heavy</div>
+        <div class="classpicker locked" id="class-engineer">Engineer</div>
+        <div class="classpicker locked" id="class-medic">Medic</div>
+        <div class="classpicker locked" id="class-sniper">Sniper</div>
+      </div>
+    </td><td class="main" valign="top">
+      <div id="turn-start" style="display: none;">
+        <button id="game-start">Start Game</button>
+      </div>
+      <div id="turn-indicator" style="display: none;">
+      </div>
+      <div id="ai-selection">
+        Enemy:
+        <label><input name="ai" type="radio" checked data-logic="aiNewbie" class="aipick">Newbie</label>
+        <label><input name="ai" type="radio" data-logic="aiReal" class="aipick">Administrator</label>
+      </div>
+      <div id="gameboard">
+        <table class="game">
+          <tr>
+            <td class="square" id="0"></td>
+            <td class="square" id="1"></td>
+            <td class="square" id="2"></td>
+          </tr>
+          <tr>
+            <td class="square" id="3"></td>
+            <td class="square" id="4"></td>
+            <td class="square" id="5"></td>
+          </tr>
+          <tr>
+            <td class="square" id="6"></td>
+            <td class="square" id="7"></td>
+            <td class="square" id="8"></td>
+          </tr>
+        </table>
+        <br>
+        Your class: <b id="class"></b><br>
+        Skill: <span id="skill"></span>
+      </div>
+    </td><td class="main" valign="top">
+      <div id="ohsnap"></div>
+    </td>
+  </tr></table>
+  <br>
+  <br>
+  <div id="achievements" style="display: none;">
+  </div>
 </body>
 </html>
