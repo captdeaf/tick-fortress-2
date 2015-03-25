@@ -24,6 +24,12 @@
   .alert-green {
     background-color: green;
   }
+  .alert-red {
+    background-color: red;
+  }
+  .alert-achieve {
+    background-color: cyan;
+  }
   .classpicker {
     cursor: pointer;
     width: 200px;
@@ -50,9 +56,24 @@
     padding: 0.5em;
     margin: 0px;
     border: 1px solid black;
-    width: 100px;
-    height: 100px;
+    width: 180px;
+    height: 180px;
     cursor: pointer;
+    text-align: center;
+    vertical-align: middle;
+  }
+  button {
+    padding: 0.5em 1em 0.5em 1em;
+  }
+  div.turn {
+    height: 2em;
+  }
+  #player-pic {
+    float: left;
+    max-width: 60px;
+    padding: 0.5em;
+    border: 1px solid black;
+    margin-right: 1em;
   }
  </style>
 </head>
@@ -65,48 +86,52 @@
     <td class="main" valign="top">
       <div id="charpicker">
         <b>Pick a Class:</b>
-        <div class="classpicker selected unlocked" id="class-nobody" data-moves="p c" data-skill="This guy will never win.">Unclassed</div>
-        <div class="classpicker unlocked" id="class-soldier" data-moves="p c p c destroy p c c p c p c p c" data-skill="You can destroy any tile your third turn, but you're slow, so enemy then goes twice.">Soldier</div>
-        <div class="classpicker unlocked" id="class-scout" data-moves="p c p p c p c p c p" data-skill="The fast-moving scout can go twice their second play!">Scout</div>
-        <div class="classpicker locked" id="class-pyro">Pyro</div>
-        <div class="classpicker locked" id="class-demoman">Demoman</div>
-        <div class="classpicker locked" id="class-heavy">Heavy</div>
-        <div class="classpicker locked" id="class-engineer">Engineer</div>
-        <div class="classpicker locked" id="class-medic">Medic</div>
-        <div class="classpicker locked" id="class-sniper">Sniper</div>
+        <div class="classpicker selected unlocked" id="class-nobody" data-pic="img/p-smiley.png" data-moves="p c" data-skill="Absolutely no talent at this game.">Unclassed</div>
+        <div class="classpicker unlocked" data-pic="img/p-soldier.png" data-moves="p c p c destroy p c c p c p c p c" data-skill="You can destroy any tile your third turn, but you're slow, so enemy then goes twice.">Soldier</div>
+        <div class="classpicker unlocked" data-pic="img/p-scout.png" data-moves="p c p c p c p p c p" data-skill="The fast-moving scout can go twice their fourth play!">Scout</div>
+        <div class="classpicker locked" data-pic="img/p-pyro.png">Pyro</div>
+        <div class="classpicker locked" data-pic="img/p-demoman.png">Demoman</div>
+        <div class="classpicker locked" data-pic="img/p-heavy.png">Heavy</div>
+        <div class="classpicker locked" data-pic="img/p-engineer.png">Engineer</div>
+        <div class="classpicker locked" data-pic="img/p-medic.png">Medic</div>
+        <div class="classpicker locked" data-pic="img/p-sniper.png">Sniper</div>
+        <div class="classpicker locked" data-pic="img/p-spy.png">Spy</div>
       </div>
     </td><td class="main" valign="top">
-      <div id="turn-start" style="display: none;">
+      <div class="turn" id="turn-start" style="display: none;">
         <button id="game-start">Start Game</button>
       </div>
-      <div id="turn-indicator" style="display: none;">
+      <div class="turn" id="turn-indicator" style="display: none;">
       </div>
       <div id="ai-selection">
         Enemy:
         <label><input name="ai" type="radio" checked data-logic="aiNewbie" class="aipick">Newbie</label>
-        <label><input name="ai" type="radio" data-logic="aiReal" class="aipick">Administrator</label>
+        <label><input name="ai" type="radio" data-logic="aiReal" class="aipick">Old hand</label>
       </div>
       <div id="gameboard">
         <table class="game">
           <tr>
-            <td class="square" id="0"></td>
-            <td class="square" id="1"></td>
-            <td class="square" id="2"></td>
+            <td class="square" data-bid="0"><img id="board0"></td>
+            <td class="square" data-bid="1"><img id="board1"></td>
+            <td class="square" data-bid="2"><img id="board2"></td>
           </tr>
           <tr>
-            <td class="square" id="3"></td>
-            <td class="square" id="4"></td>
-            <td class="square" id="5"></td>
+            <td class="square" data-bid="3"><img id="board3"></td>
+            <td class="square" data-bid="4"><img id="board4"></td>
+            <td class="square" data-bid="5"><img id="board5"></td>
           </tr>
           <tr>
-            <td class="square" id="6"></td>
-            <td class="square" id="7"></td>
-            <td class="square" id="8"></td>
+            <td class="square" data-bid="6"><img id="board6"></td>
+            <td class="square" data-bid="7"><img id="board7"></td>
+            <td class="square" data-bid="8"><img id="board8"></td>
           </tr>
         </table>
         <br>
-        Your class: <b id="class"></b><br>
-        Skill: <span id="skill"></span>
+        <div>
+          <img style="float: left; max-width: 60px;" id="player-pic" src="img/p-smiley.png">
+          Your class: <b id="class"></b><br>
+          <span id="skill"></span>
+        </div>
       </div>
     </td><td class="main" valign="top">
       <div id="ohsnap"></div>
