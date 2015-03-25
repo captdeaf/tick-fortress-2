@@ -79,9 +79,6 @@ var TickFortress = Backbone.View.extend({
     this.pics.p = this.playerPic;
     $('#player-pic').attr('src', this.playerPic);
     this.$el.find('#skill').text(this.skill);
-    if (this.name != 'Unclassed') {
-      this.achieve("First class picked!");
-    }
     this.prepGame();
   },
   
