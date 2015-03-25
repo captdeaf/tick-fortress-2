@@ -68,12 +68,15 @@
   div.turn {
     height: 2em;
   }
-  #player-pic {
+  .ppic {
     float: left;
     max-width: 60px;
     padding: 0.5em;
     border: 1px solid black;
     margin-right: 1em;
+  }
+  #turn-indicator {
+    font-weight: bold;
   }
  </style>
 </head>
@@ -86,27 +89,35 @@
     <td class="main" valign="top">
       <div id="charpicker">
         <b>Pick a Class:</b>
-        <div class="classpicker selected unlocked" id="class-nobody" data-pic="img/p-smiley.png" data-moves="p c" data-skill="Absolutely no talent at this game.">Unclassed</div>
-        <div class="classpicker unlocked" data-pic="img/p-soldier.png" data-moves="p c p c destroy p c c p c p c p c" data-skill="You can destroy any tile your third turn, but you're slow, so enemy then goes twice.">Soldier</div>
-        <div class="classpicker unlocked" data-pic="img/p-scout.png" data-moves="p c p c p c p p c p" data-skill="The fast-moving scout can go twice their fourth play!">Scout</div>
-        <div class="classpicker locked" data-pic="img/p-pyro.png">Pyro</div>
-        <div class="classpicker locked" data-pic="img/p-demoman.png">Demoman</div>
-        <div class="classpicker locked" data-pic="img/p-heavy.png">Heavy</div>
-        <div class="classpicker locked" data-pic="img/p-engineer.png">Engineer</div>
-        <div class="classpicker locked" data-pic="img/p-medic.png">Medic</div>
-        <div class="classpicker locked" data-pic="img/p-sniper.png">Sniper</div>
-        <div class="classpicker locked" data-pic="img/p-spy.png">Spy</div>
+        <div class="classpicker selected" id="class-nobody" data-pic="img/p-smiley.png" data-moves="p c" data-skill="Absolutely no talent at this game.">Unclassed</div>
+        <div class="classpicker" data-pic="img/p-pyro.png" data-first="burn burn" data-moves="p c p c p autoendburn c" data-skill="You can set two tiles on fire that will go out on your third turn!">Pyro</div>
+        <div class="classpicker" data-pic="img/p-scout.png" data-moves="p c p c p c p" data-skill="The fast-moving scout can go twice their fourth play!">Scout</div>
+        <div class="classpicker" data-pic="img/p-demoman.png" data-moves="p c p c p c destroy" data-skill="You can destroy any tile your fourth turn. Too easy.">Demoman</div>
+        <div class="classpicker" data-pic="img/p-heavy.png" data-moves="p c p c p c pickswapa pickswapb" data-skill="Using your weight, you can two tiles to swap them.">Heavy</div>
+        <div class="classpicker" data-pic="img/p-medic.png" data-first="bait bait" data-moves="p c" data-skill="Chief goes where the healing is, bait him.">Medic</div>
+        <div class="classpicker" data-pic="img/p-spy.png" data-moves="p c p c p c autoswapteam" data-skill="On your fourth move, you turn coat, and make chief do the same.">Spy</div>
+        <div class="classpicker" data-pic="img/p-soldier.png" data-skill="">Soldier</div>
+        <div class="classpicker" data-pic="img/p-engineer.png" data-skill="">Engineer</div>
+        <div class="classpicker" data-pic="img/p-sniper.png">Sniper</div>
       </div>
     </td><td class="main" valign="top">
-      <div class="turn" id="turn-start" style="display: none;">
-        <button id="game-start">Start Game</button>
-      </div>
+      <table><tr>
+        <td style="width: 300px;">
+          <div id="ai-selection" style="height: 100px;">
+            <img class="ppic" src="img/c-chief.png">
+            Enemy: Master Chief<br>
+            <label><input name="ai" type="radio" data-logic="aiNewbie" class="aipick">Newbie</label><br>
+            <label><input name="ai" type="radio" checked data-logic="aiReal" class="aipick">Old hand</label>
+          </div>
+        </td><td style="width: 300px;">
+          <div style="height: 100px;">
+            <img class="ppic" id="player-pic" src="img/p-smiley.png">
+            You: <b id="class"></b><br>
+            <span id="skill"></span>
+          </div>
+        </td>
+      </tr></table>
       <div class="turn" id="turn-indicator" style="display: none;">
-      </div>
-      <div id="ai-selection">
-        Enemy:
-        <label><input name="ai" type="radio" checked data-logic="aiNewbie" class="aipick">Newbie</label>
-        <label><input name="ai" type="radio" data-logic="aiReal" class="aipick">Old hand</label>
       </div>
       <div id="gameboard">
         <table class="game">
@@ -126,12 +137,6 @@
             <td class="square" data-bid="8"><img id="board8"></td>
           </tr>
         </table>
-        <br>
-        <div>
-          <img style="float: left; max-width: 60px;" id="player-pic" src="img/p-smiley.png">
-          Your class: <b id="class"></b><br>
-          <span id="skill"></span>
-        </div>
       </div>
     </td><td class="main" valign="top">
       <div id="ohsnap"></div>
