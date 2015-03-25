@@ -51,6 +51,7 @@ $(function() {
     events: {
       'click .classpicker': 'pickClass',
       'click .square': 'pickSquare',
+      'click #reset-game': 'prepGame',
     },
     moveDescriptions: {
       p: 'Your turn, pick a square',
