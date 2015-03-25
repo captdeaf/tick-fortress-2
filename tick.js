@@ -41,8 +41,8 @@ var TickFortress = Backbone.View.extend({
     burn: 'Pick a tile to burn!',
     autoendburn: 'The flames die down ...',
     bait: 'Place a medic kit',
-    pickswapa: 'Pick a tile to swap',
-    pickswapb: 'Pick the tile to swap it with',
+    swapa: 'Pick a tile to swap',
+    swapb: 'Pick the tile to swap it with',
     autoswapteam: "You're a real Benedict Arnold.",
     c: [
       'Chief is pretty confident about this move!',
@@ -387,6 +387,32 @@ var TickFortress = Backbone.View.extend({
     var me = this;
     this.moveComplete();
   },
+  pick_swapa: function(bid) {
+    if (this.board[bid] == '') {
+      ohSnap("You can't shove an empty square", 'red');
+    } else {
+      this.swapFrom = bid;
+      this.moveComplete();
+    }
+  },
+  pick_swapb: function(bid) {
+    if (this.board[bid] == '') {
+      ohSnap("You can't shove an empty square", 'red');
+    } else if (this.swapFrom == bid) {
+      this.achieve("Bullying.");
+      this.moveComplete();
+    } else if (this.board[bid] == this.board[this.swapFrom]) {
+      this.achieve("Useless shoving.");
+      this.moveComplete();
+    } else {
+      var tmp = this.board[bid];
+      this.board[bid] = this.board[this.swapFrom];
+      this.board[this.swapFrom] = tmp;
+      this.achieve("Shovetastic.");
+      this.renderBoard();
+      this.moveComplete();
+    }
+  },
   autoswapteam: function() {
     for (var i = 0; i < 9; i++) {
       if (this.board[i] == 'p') {
@@ -395,6 +421,7 @@ var TickFortress = Backbone.View.extend({
         this.board[i] = 'p';
       } 
     }
+    this.achieve("Sneaky sneaky.");
     this.renderBoard();
   },
   autoendburn: function() {
