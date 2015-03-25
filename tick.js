@@ -318,6 +318,7 @@ var TickFortress = Backbone.View.extend({
       ohSnap("You can only shove a Master Chief.", 'red');
     } else {
       this.vars.swapFrom = bid;
+      this.$el.find('#board' + bid).addClass('blink')
       this.moveComplete();
     }
   },
@@ -328,6 +329,7 @@ var TickFortress = Backbone.View.extend({
       this.board[bid] = 'c';
       this.board[this.vars.swapFrom] = '';
       this.achieve("Shovetastic.");
+      this.$el.find('.blink').removeClass('blink');
       this.renderBoard();
       this.moveComplete();
     }
@@ -337,6 +339,7 @@ var TickFortress = Backbone.View.extend({
       ohSnap("You can only have your pieces jump.", 'red');
     } else {
       this.vars.jumpFrom = bid;
+      this.$el.find('#board' + bid).addClass('blink')
       this.moveComplete();
     }
   },
@@ -347,6 +350,7 @@ var TickFortress = Backbone.View.extend({
       this.board[bid] = 'p';
       this.board[this.vars.jumpFrom] = '';
       this.achieve("Shovetastic.");
+      this.$el.find('.blink').removeClass('blink');
       this.renderBoard();
       this.moveComplete();
     }
