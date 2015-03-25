@@ -91,6 +91,20 @@
     padding: 0.25em;
     width: 120px;
   }
+  @keyframes blink {
+    to {
+      visibility: hidden;
+    }
+  }
+  @-webkit-keyframes blink {
+    to {
+      visibility: hidden;
+    }
+  }
+  .blink {
+    animation: blink 1s steps(5, start) infinite;
+    -webkit-animation: blink 1s steps(5, start) infinite;
+  }
  </style>
 </head>
 <body>
@@ -164,11 +178,14 @@
         <div class="classpicker locked"
              data-pic="img/p-engineer.png"
              data-moves="p c p c autoturret p c autoturret"
-             data-skill="A turret snipes ">
+             data-skill="A turret snipes random chiefs occasionally.">
           <img class="picker" src="img/p-engineer.png">
           Engineer
         </div>
         <div class="classpicker locked"
+             data-moves="p c"
+             data-first="camp camp"
+             data-skill="Spawn camp two squares that can't both be used for the same line. Chief can't go there, but you can."
              data-pic="img/p-sniper.png">
           <img class="picker" src="img/p-sniper.png">
           Sniper

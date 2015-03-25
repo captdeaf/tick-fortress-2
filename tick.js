@@ -16,6 +16,7 @@ var TickFortress = Backbone.View.extend({
     'destroy': 'img/destroy.gif',
     'burning': 'img/burning.gif',
     'bait': 'img/bait.jpg',
+    'camp': 'img/camp.jpg',
     '': ''
   },
 
@@ -49,6 +50,7 @@ var TickFortress = Backbone.View.extend({
     jumpb: 'Pick where he lands',
     autoswapteam: "You're a real Benedict Arnold. Traitors, traitors everywhere",
     autoturret: "Target acquired. BLAM BLAM BLAM BLAM. Target dead.",
+    camp: 'Spawn camp a non-central location.',
     c: [
       'Chief is pretty confident about this move!',
       'Chief looks panicked!',
@@ -92,6 +94,7 @@ var TickFortress = Backbone.View.extend({
       clearTimeout(this.cputimer);
       this.cputimer = undefined;
     }
+    this.vars = {};
     this.board = [
        '','','',
        '','','',
@@ -150,6 +153,8 @@ var TickFortress = Backbone.View.extend({
       var me = this; // Oh, ECMA6, where are you ...
       this.cputimer = setTimeout(function() {
         me.cputimer = undefined;
+        me.clearAutos();
+        me.renderBoard();
         me.moveComplete();
       }, 2000);
     }
@@ -258,7 +263,7 @@ var TickFortress = Backbone.View.extend({
     this.achieve("Turn stealer");
   },
   pick_p: function(bid) {
-    if (this.board[bid] != '') {
+    if (this.board[bid] != '' && this.board[bid] != 'camp') {
       ohSnap("You can't play there", 'red');
       this.achieve("First invalid move!");
     } else {
@@ -312,7 +317,7 @@ var TickFortress = Backbone.View.extend({
     if (this.board[bid] != 'c') {
       ohSnap("You can only shove a Master Chief.", 'red');
     } else {
-      this.swapFrom = bid;
+      this.vars.swapFrom = bid;
       this.moveComplete();
     }
   },
@@ -321,7 +326,7 @@ var TickFortress = Backbone.View.extend({
       ohSnap("You can't shove a Chief into someone else.", 'red');
     } else {
       this.board[bid] = 'c';
-      this.board[this.swapFrom] = '';
+      this.board[this.vars.swapFrom] = '';
       this.achieve("Shovetastic.");
       this.renderBoard();
       this.moveComplete();
@@ -331,7 +336,7 @@ var TickFortress = Backbone.View.extend({
     if (this.board[bid] != 'p') {
       ohSnap("You can only have your pieces jump.", 'red');
     } else {
-      this.jumpFrom = bid;
+      this.vars.jumpFrom = bid;
       this.moveComplete();
     }
   },
@@ -340,11 +345,14 @@ var TickFortress = Backbone.View.extend({
       ohSnap("You can only jump into an empty square.", 'red');
     } else {
       this.board[bid] = 'p';
-      this.board[this.jumpFrom] = '';
+      this.board[this.vars.jumpFrom] = '';
       this.achieve("Shovetastic.");
       this.renderBoard();
       this.moveComplete();
     }
+  },
+  clearAutos: function() {
+    this.$el.find('.blink').removeClass('blink');
   },
   autoswapteam: function() {
     for (var i = 0; i < 9; i++) {
@@ -354,7 +362,8 @@ var TickFortress = Backbone.View.extend({
         this.board[i] = 'p';
       } 
     }
-    this.achieve("Sneaky sneaky.");
+    this.$el.find('.square img').addClass('blink');
+    this.achieve("Traitors identified on both teams!");
   },
   autoendburn: function() {
     for (var i = 0; i < 9; i++) {
@@ -373,14 +382,52 @@ var TickFortress = Backbone.View.extend({
       }
     }
     var selection = chiefs[Math.floor((Math.random() * chiefs.length))];
+    this.$el.find('#board' + selection).addClass('blink')
     this.board[selection] = '';
-    this.renderBoard();
   },
   pick_wait: function(bid) {
     this.achieve('So impatient!');
   },
   pick_completed: function(bid) {
       this.achieve("Attempted to play after game over!");
+  },
+  pick_camp: function(bid) {
+    if (bid == 4) {
+      this.achieve("CAAAAAAMPERRRRR!");
+      ohSnap("You can't camp the center!", "red");
+    } else if (this.vars.camp == bid) {
+      this.achieve("Double the camping, double the fun!");
+      this.moveComplete();
+    } else if (this.vars.camp) {
+      var a = this.vars.camp;
+      var x;
+      if (a > bid) {
+        x = '' + bid + '' + a;
+      } else {
+        x = '' + a + '' + bid;
+      }
+      //  0 1 2
+      //  3 4 5
+      //  6 7 8
+      var sees = [
+        "01", "02", "03", "06", "08",
+        "12", "17", "25", "28", "35",
+        "36", "58", "67", "68", "78"
+        ];
+      for (var i = 0; i < sees.length; i++) {
+        if (sees[i] == x) {
+          ohSnap("You can't camp two spots in the same winning line!", "red");
+          this.achieve("Can't hold the line.");
+          return;
+        }
+      }
+      this.board[bid] = 'camp';
+      this.moveComplete();
+    } else {
+      this.vars.camp = bid;
+      this.board[bid] = 'camp';
+      this.moveComplete();
+    }
   },
   renderBoard: function() {
     for (var i = 0; i < 9; i++) {
