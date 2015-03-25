@@ -3,6 +3,8 @@
  * Code for Tick Fortress 2.
  */
 
+var Solver;
+
 var TickFortress = Backbone.View.extend({
   Achievements: {},
   Unlocked: {},
@@ -41,9 +43,12 @@ var TickFortress = Backbone.View.extend({
     burn: 'Pick a tile to burn!',
     autoendburn: 'The flames die down ...',
     bait: 'Place a medic kit',
-    swapa: 'Pick a tile to swap',
-    swapb: 'Pick the tile to swap it with',
-    autoswapteam: "You're a real Benedict Arnold.",
+    swapa: 'Pick a chief to shove',
+    swapb: 'Pick the tile to shove him to',
+    jumpa: 'Pick your soldier to rocket-launch',
+    jumpb: 'Pick where he lands',
+    autoswapteam: "You're a real Benedict Arnold. Traitors, traitors everywhere",
+    autoturret: "Target acquired. BLAM BLAM BLAM BLAM. Target dead.",
     c: [
       'Chief is pretty confident about this move!',
       'Chief looks panicked!',
@@ -152,41 +157,17 @@ var TickFortress = Backbone.View.extend({
   moveComplete: function() {
     this.renderBoard();
     // Check for a win.
-    var winner = this.checkWin();
+    var winner = Solver.checkWin(this.board);
     if (winner) {
       this.gameOver(winner);
       return;
     }
     // Check for stalemate.
-    if (this.checkEmpty()) {
+    if (Solver.checkMate(this.board)) {
       this.gameOver();
       return;
     }
     this.nextMove();
-  },
-  checkWin: function() {
-    // Horizontal.
-    var b = this.board;
-    if (b[0] != '' && b[0] == b[1] && b[0] == b[2]) return b[0];
-    if (b[3] != '' && b[3] == b[4] && b[3] == b[5]) return b[3];
-    if (b[6] != '' && b[6] == b[7] && b[6] == b[8]) return b[6];
-    // Vertical
-    if (b[0] != '' && b[0] == b[3] && b[0] == b[6]) return b[0];
-    if (b[1] != '' && b[1] == b[4] && b[1] == b[7]) return b[1];
-    if (b[2] != '' && b[2] == b[5] && b[2] == b[8]) return b[2];
-    // Diagonals
-    if (b[0] != '' && b[0] == b[4] && b[0] == b[8]) return b[0];
-    if (b[2] != '' && b[2] == b[4] && b[2] == b[6]) return b[2];
-    // No win
-    return false;
-  },
-  checkEmpty: function() {
-    var b = this.board;
-    if (b[0] != '' && b[1] != '' && b[2] != '' &&
-        b[3] != '' && b[4] != '' && b[5] != '' &&
-        b[6] != '' && b[7] != '' && b[8] != '') {
-      return true;
-    }
   },
   gameOver: function(winner) {
     if (winner == 'p') {
@@ -238,86 +219,29 @@ var TickFortress = Backbone.View.extend({
         return;
       }
     }
-    var empties = [];
-    for (var i = 0; i < 9; i++) {
-      if (orig[i] == '') {
-        empties.push(i);
-      }
-    }
-
-    var selection = empties[Math.floor((Math.random() * empties.length))];
     // Enemy has played.
     this.board[selection] = 'c';
   },
   aiReal: function() {
-    // Strategy:
-    // 1) If two 'c's in a line with a third in same line empty ... take it.
-    // 2) If two 'p's in a line with a third in same line empty ... take it (block)
-    // 3) Take center if it exists.
-    // 4) Take a corner, preferring a corner not opposite a 'p'
-    // 5) Take a space that may make a line with a 'c'
-    // 6) Take any space.
-  
-    // Store original board
-    var orig = [].concat(this.board);
     // Implementation.
     // For the engineer: If there's any bait, then swap the first bait and return.
     for (var i = 0; i < 9; i++) {
-      if (orig[i] == 'bait') {
+      if (this.board[i] == 'bait') {
         this.board[i] = 'c';
         return;
       }
     }
 
-    //
-    // 1) If two 'c's in a line with a third in same line empty ... take it.
-    // I'm lazy now, so I'm gonna cheat and brute force it.
-    for (var i = 0; i < 9; i++) {
-      if (orig[i] == '') {
-        this.board = [].concat(orig);
-        this.board[i] = 'c';
-        if (this.checkWin() == 'c') {
-          return;
-        }
-      }
-    }
-
-    // 2) If two 'p's in a line with a third in same line empty ... take it (block)
-    // Same laziness as earlier logic. If I compare against non-'c's, then AI treats,
-    // e.g: burning fires from Pyro as player, which it shouldn't, being a dumb
-    // AI against "skills".
-    for (var i = 0; i < 9; i++) {
-      if (orig[i] == '') {
-        this.board = [].concat(orig);
-        this.board[i] = 'p';
-        if (this.checkWin() == 'p') {
-          this.board[i] = 'c';
-          return;
-        }
-      }
-    }
-
-    this.board = orig;
-    
-    // 3) Take center if it exists.
-    if (orig[4] == '') {
-      orig[4] = 'c';
+    // Going first: If all are empty, I just pick center.
+    for (var i = 0; i < 9 && this.board[i] == ''; i++);
+    if (i == 9) {
+      this.board[4] = 'c';
       return;
     }
 
-    // 4) Take a corner, preferring a corner near a 'p'
-    if (orig[8] != 'p' && orig[0] == '') { this.board[0] = 'c'; return; }
-    if (orig[6] != 'p' && orig[2] == '') { this.board[2] = 'c'; return; }
-    if (orig[2] != 'p' && orig[6] == '') { this.board[6] = 'c'; return; }
-    if (orig[0] != 'p' && orig[8] == '') { this.board[8] = 'c'; return; }
-
-    if (orig[0] == '') { this.board[0] = 'c'; return; }
-    if (orig[2] == '') { this.board[2] = 'c'; return; }
-    if (orig[6] == '') { this.board[6] = 'c'; return; }
-    if (orig[8] == '') { this.board[8] = 'c'; return; }
-
-    // 5) Take any space.
-    this.aiNewbie();
+    // Try and get the best.
+    var ideal = Solver.idealMove(this.board);
+    this.board[ideal] = 'c';
   },
   pickSquare: function(evt) {
     var bid = $(evt.currentTarget).data('bid');
@@ -385,26 +309,38 @@ var TickFortress = Backbone.View.extend({
     this.moveComplete();
   },
   pick_swapa: function(bid) {
-    if (this.board[bid] == '') {
-      ohSnap("You can't shove an empty square", 'red');
+    if (this.board[bid] != 'c') {
+      ohSnap("You can only shove a Master Chief.", 'red');
     } else {
       this.swapFrom = bid;
       this.moveComplete();
     }
   },
   pick_swapb: function(bid) {
-    if (this.board[bid] == '') {
-      ohSnap("You can't shove an empty square", 'red');
-    } else if (this.swapFrom == bid) {
-      this.achieve("Bullying.");
-      this.moveComplete();
-    } else if (this.board[bid] == this.board[this.swapFrom]) {
-      this.achieve("Useless shoving.");
-      this.moveComplete();
+    if (this.board[bid] != '') {
+      ohSnap("You can't shove a Chief into someone else.", 'red');
     } else {
-      var tmp = this.board[bid];
-      this.board[bid] = this.board[this.swapFrom];
-      this.board[this.swapFrom] = tmp;
+      this.board[bid] = 'c';
+      this.board[this.swapFrom] = '';
+      this.achieve("Shovetastic.");
+      this.renderBoard();
+      this.moveComplete();
+    }
+  },
+  pick_jumpa: function(bid) {
+    if (this.board[bid] != 'p') {
+      ohSnap("You can only have your pieces jump.", 'red');
+    } else {
+      this.jumpFrom = bid;
+      this.moveComplete();
+    }
+  },
+  pick_jumpb: function(bid) {
+    if (this.board[bid] != '') {
+      ohSnap("You can only jump into an empty square.", 'red');
+    } else {
+      this.board[bid] = 'p';
+      this.board[this.jumpFrom] = '';
       this.achieve("Shovetastic.");
       this.renderBoard();
       this.moveComplete();
@@ -419,7 +355,6 @@ var TickFortress = Backbone.View.extend({
       } 
     }
     this.achieve("Sneaky sneaky.");
-    this.renderBoard();
   },
   autoendburn: function() {
     for (var i = 0; i < 9; i++) {
@@ -427,6 +362,18 @@ var TickFortress = Backbone.View.extend({
         this.board[i] = '';
       }
     }
+    this.renderBoard();
+  },
+  autoturret: function() {
+    this.achieve("Target acquired. Blam blam blam blam.");
+    var chiefs = [];
+    for (var i = 0; i < 9; i++) {
+      if (this.board[i] == 'c') {
+        chiefs.push(i);
+      }
+    }
+    var selection = chiefs[Math.floor((Math.random() * chiefs.length))];
+    this.board[selection] = '';
     this.renderBoard();
   },
   pick_wait: function(bid) {
@@ -442,9 +389,114 @@ var TickFortress = Backbone.View.extend({
   },
 });
 
+Solver = {
+  checkWin: function(b) {
+    // Horizontal.
+    if (b[0] != '' && b[0] == b[1] && b[0] == b[2]) return b[0];
+    if (b[3] != '' && b[3] == b[4] && b[3] == b[5]) return b[3];
+    if (b[6] != '' && b[6] == b[7] && b[6] == b[8]) return b[6];
+    // Vertical
+    if (b[0] != '' && b[0] == b[3] && b[0] == b[6]) return b[0];
+    if (b[1] != '' && b[1] == b[4] && b[1] == b[7]) return b[1];
+    if (b[2] != '' && b[2] == b[5] && b[2] == b[8]) return b[2];
+    // Diagonals
+    if (b[0] != '' && b[0] == b[4] && b[0] == b[8]) return b[0];
+    if (b[2] != '' && b[2] == b[4] && b[2] == b[6]) return b[2];
+    // No win
+    return false;
+  },
+  checkMate: function(b) {
+    if (b[0] != '' && b[1] != '' && b[2] != '' &&
+        b[3] != '' && b[4] != '' && b[5] != '' &&
+        b[6] != '' && b[7] != '' && b[8] != '') {
+      return true;
+    }
+  },
+  idealMove: function(orig) {
+    // Strategy:
+    // *) If two 'c's in a line with a third in same line empty ... take it.
+    // *) If two 'p's in a line with a third in same line empty ... take it (block)
+    // *) Take center if it exists.
+    // *) Watch out for major fork: XOX (pcp) with p in corners. If so, pick
+    //    a non-corner tile in an empty row.
+    // *) Take a corner, preferring a corner not opposite a 'p'
+    // *) Take a space that may make a line with a 'c'
+    // *) Take any space.
+  
+    // Store original board
+    // Implementation.
+
+    //
+    // If two 'c's in a line with a third in same line empty ... take it.  I'm
+    // lazy now, so I'm gonna cheat and brute force it.
+    for (var i = 0; i < 9; i++) {
+      if (orig[i] == '') {
+        var board = [].concat(orig);
+        board[i] = 'c';
+        if (this.checkWin(board) == 'c') {
+          return i;
+        }
+      }
+    }
+
+    // If two 'p's in a line with a third in same line empty ... take it (block)
+    // Same laziness as earlier logic. If I compare against non-'c's, then AI treats,
+    // e.g: burning fires from Pyro as player, which it shouldn't, being a dumb
+    // AI against "skills".
+    for (var i = 0; i < 9; i++) {
+      if (orig[i] == '') {
+        var board = [].concat(orig);
+        board[i] = 'p';
+        if (this.checkWin(board) == 'p') {
+          return i;
+        }
+      }
+    }
+    
+    // Take center if it's empty.
+    if (orig[4] == '') {
+      return 4;
+    }
+
+    // Check for XOX (pcp) on diagonals for an unbeatable fork.
+    if (orig[4] == 'c') {
+      if ((orig[0] == 'p' && orig[8] == 'p') ||
+          (orig[2] == 'p' && orig[6] == 'p')) {
+        if (orig[1] == '' && orig[7] == '') {
+          return 1;
+        } else if (orig[3] == '' && orig[5] == '') {
+          return 3;
+        }
+      }
+    }
+
+    // Take a corner, preferring a corner near a 'p'
+    if (orig[8] != 'p' && orig[0] == '') { return 0; }
+    if (orig[6] != 'p' && orig[2] == '') { return 2; }
+    if (orig[2] != 'p' && orig[6] == '') { return 6; }
+    if (orig[0] != 'p' && orig[8] == '') { return 8; }
+
+    if (orig[0] == '') { return 0; }
+    if (orig[2] == '') { return 2; }
+    if (orig[6] == '') { return 6; }
+    if (orig[8] == '') { return 8; }
+
+    // Pick randomly.
+    return this.randomMove(orig);
+  },
+  randomMove: function(orig) {
+    var empties = [];
+    for (var i = 0; i < 9; i++) {
+      if (orig[i] == '') {
+        empties.push(i);
+      }
+    }
+
+    return empties[Math.floor((Math.random() * empties.length))];
+  }
+};
 
 var Game;
-
 // Initial defaults on page load.
 $(function() {
   Game = new TickFortress({el: $('body')});
