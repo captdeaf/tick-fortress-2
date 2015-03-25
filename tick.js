@@ -441,7 +441,7 @@ $(function() {
       } else if (this.vars.camp === bid) {
         this.achieve("Double the camping, double the fun!");
         this.moveComplete();
-      } else if (this.vars.camp) {
+      } else if (this.vars.camp != undefined) {
         var a = this.vars.camp;
         var x;
         if (a > bid) {
@@ -457,6 +457,7 @@ $(function() {
           "12", "17", "25", "28", "35",
           "36", "58", "67", "68", "78"
           ];
+        console.log("Sees: '" + sees + "'");
         for (i = 0; i < sees.length; i += 1) {
           if (sees[i] === x) {
             ohSnap("You can't camp two spots in the same winning line!", "red");
